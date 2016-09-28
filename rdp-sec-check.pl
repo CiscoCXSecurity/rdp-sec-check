@@ -118,7 +118,7 @@ my $outfile = undef;
 my @targets = ();
 
 my $global_recv_timeout = 10;
-my $global_connect_fail_count = 5;
+my $global_connect_fail_count = 2;
 my $global_connection_count = 0;
 
 my $result = GetOptions (
@@ -217,8 +217,12 @@ sub scan_host {
 	my @response;
 
 	print "[+] Checking supported protocols\n\n";
-	print "[-] Checking if RDP Security (PROTOCOL_RDP) is supported...";
 	$socket = get_socket($ip, $port);
+	if (!defined($socket)) {
+		print "[E] Unable to create socket\n\n";
+		return;
+	}
+	print "[-] Checking if RDP Security (PROTOCOL_RDP) is supported...";
 	@response = test_std_rdp_security($socket);
 	if (scalar @response == 19) {
 		my $type = $rdp_neg_type{sprintf "%02x", ord($response[11])};
@@ -591,13 +595,13 @@ sub get_socket {
 		};
 		if ($@) {
 			print "[W] Timeout on connect.  Retrying...\n";
-			return undef;
 		}
 		unless (defined($socket)) {
 			$failcount++;
 		}
 		if ($failcount > $global_connect_fail_count) {
-			die "ERROR: failed to connect $global_connect_fail_count times\n";
+			print "\nERROR: failed to connect $failcount time(s)\n";
+			return;
 		}
 	}
 	return $socket;
