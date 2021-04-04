@@ -128,7 +128,7 @@ my $result = GetOptions (
          "file=s"    => \$hostfile,
          "outfile=s" => \$outfile,
          "timeout=i" => \$global_recv_timeout,
-         "retries=i" => \$global_connection_count,
+         "retries=i" => \$global_connect_fail_count,
 );
 
 if ($help) {
